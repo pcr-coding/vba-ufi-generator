@@ -1,4 +1,4 @@
-# vba-ufi-generator
+# VBA UFI Generator
 [![License: MIT](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://opensource.org/licenses/gpl-3.0)
 
 VBA Generator/decoder for [ECHA](https://ufi.echa.europa.eu/#/create) UFIs (Unique Formula Identifier)  
