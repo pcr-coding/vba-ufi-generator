@@ -76,3 +76,6 @@ Public Sub ExampleValidate()
 End Sub
 ```
 Validator will only return `True`/`False` and does not throw errors.
+
+## Unit Testing
+Includes unit test modules to be used with [RubberDuck](https://rubberduckvba.com/). These 2 test modules are only needed for development.
