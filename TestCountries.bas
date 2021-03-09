@@ -415,6 +415,54 @@ TestFail:
 End Sub
 
 '@TestMethod("TestCountry")
+Private Sub TestCountryES()
+    On Error GoTo TestFail
+    
+    'Arrange:
+    Dim sut As UFIgenerator
+    Set sut = New UFIgenerator
+    
+    Const n As Long = 1
+    Const CountryCode As String = "ES"
+    
+    Dim Test() As Variant
+    ReDim Test(1 To n) As Variant
+    
+    Test(1) = Array("A1234567X", "178956970", "T23S-6QD4-3MHA-VT69")
+              'Official sample in table B-1 was missing (this is a own online generator verified sample)
+    
+    'Act:
+    Dim ResultGenerate() As String
+    ReDim ResultGenerate(1 To n) As String
+    Dim ResultDecode() As DecodedUFI
+    ReDim ResultDecode(1 To n) As DecodedUFI
+    
+    Dim i As Long
+    For i = 1 To n
+        ResultGenerate(i) = sut.Generate(CountryCode, Test(i)(0), Test(i)(1))
+        Set ResultDecode(i) = sut.Decode(Test(i)(2))
+    Next i
+    
+    'Assert:
+    For i = 1 To n
+        Assert.IsTrue ResultGenerate(i) = Test(i)(2), "ResultGenerate " & i & " should be " & Test(i)(2) & " but was " & ResultGenerate(i)
+        
+        If Not ResultDecode(i) Is Nothing Then
+            Assert.IsTrue ResultDecode(i).CountryCode = CountryCode, "ResultDecode.CountryCode " & i & " should be " & CountryCode & " but was " & ResultDecode(i).CountryCode
+            Assert.IsTrue ResultDecode(i).VAT = Test(i)(0), "ResultDecode.VAT " & i & " should be " & Test(i)(0) & " but was " & ResultDecode(i).VAT
+            Assert.IsTrue ResultDecode(i).FormulationNumber = Test(i)(1), "ResultDecode.FormulationNumber " & i & " should be " & Test(i)(1) & " but was " & ResultDecode(i).FormulationNumber
+        Else
+            Assert.Fail "Decode of UFI " & Test(i)(2) & " failed with no result."
+        End If
+    Next i
+
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("TestCountry")
 Private Sub TestCountryFR()
     On Error GoTo TestFail
     

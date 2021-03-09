@@ -302,6 +302,27 @@ Private Function GetBinaryVAT(ByVal CountryCode As String, ByVal VAT As String) 
                 V = CDec(VAT)
             End If
             
+        Case "ES"
+            If IsMatchingPattern("^[0-9A-Z][0-9]{7}[0-9A-Z]$", VAT) Then
+                d = CLng(Mid$(VAT, 2, 7))
+                
+                Character1 = Left$(VAT, 1)
+                If IsNumeric(Character1) Then
+                    c1 = CLng(Character1)
+                Else
+                    c1 = Asc(Character1) - 65 + 10
+                End If
+                
+                Character2 = Right$(VAT, 1)
+                If IsNumeric(Character2) Then
+                    c2 = CLng(Character2)
+                Else
+                    c2 = Asc(Character2) - 65 + 10
+                End If
+                
+                V = CDec((36 * c1 + c2) * 10 ^ 7 + d)
+            End If
+            
         Case "FR"
             If IsMatchingPattern("^[0-9A-Z]{2}[0-9]{9}$", VAT) Then
                 d = CLng(Right$(VAT, 9))
@@ -378,6 +399,7 @@ Private Function GetBinaryVAT(ByVal CountryCode As String, ByVal VAT As String) 
                     Else
                         c1 = Asc(Character1) - 65 + 10
                     End If
+
                     V = V + CDec(36 ^ (6 - i) * c1)
                 Next i
             End If
@@ -491,6 +513,33 @@ Private Function UndoBinaryVAT(ByVal CountryCode As String, ByVal BinaryVAT As S
             'For matching [0-9]{8}
             VAT = Right$(String(8, "0") & CStr(V), 8)
             If Not IsMatchingPattern("^[0-9]{8}$", VAT) Then VAT = vbNullString
+        
+        Case "ES"
+            'For matching [0-9A-Z][0-9]{7}[0-9A-Z]
+            d = CLng(Right$(V, 7))
+            FirstPart = CLng(CStr(Left$(V, Len(V) - 7)))
+            
+            'Brut force the possibility to find c1 and c2
+            c1 = -1: c2 = -1
+            i = 0
+            Do While c1 = -1 And i < 36
+                j = 0
+                Do While c2 = -1 And j < 36
+                    If 36 * i + j = FirstPart Then
+                        c1 = i
+                        c2 = j
+                    End If
+                    j = j + 1
+                Loop
+                i = i + 1
+            Loop
+            
+            Character1 = IIf(c1 < 10, CStr(c1), Chr$(c1 + 65 - 10))
+            Character2 = IIf(c2 < 10, CStr(c2), Chr$(c2 + 65 - 10))
+            
+            VAT = Character1 & Right$(String(7, "0") & CStr(d), 7) & Character2
+            If Not IsMatchingPattern("^[0-9A-Z][0-9]{7}[0-9A-Z]$", VAT) Then VAT = vbNullString
+        
         
         Case "FR"
             'For matching [0-9A-Z]{2}[0-9]{9}
