@@ -540,6 +540,7 @@ Private Sub TestCountryGB()
     
     Const n As Long = 5
     Const CountryCode As String = "GB"
+    Const MultiCountryCode As String = "GB|XN"
     
     Dim Test() As Variant
     ReDim Test(1 To n) As Variant
@@ -567,7 +568,59 @@ Private Sub TestCountryGB()
         Assert.IsTrue ResultGenerate(i) = Test(i)(2), "ResultGenerate " & i & " should be " & Test(i)(2) & " but was " & ResultGenerate(i)
         
         If Not ResultDecode(i) Is Nothing Then
-            Assert.IsTrue ResultDecode(i).CountryCode = CountryCode, "ResultDecode.CountryCode " & i & " should be " & CountryCode & " but was " & ResultDecode(i).CountryCode
+            Assert.IsTrue ResultDecode(i).CountryCode = MultiCountryCode, "ResultDecode.CountryCode " & i & " should be " & MultiCountryCode & " but was " & ResultDecode(i).CountryCode
+            Assert.IsTrue ResultDecode(i).VAT = Test(i)(0), "ResultDecode.VAT " & i & " should be " & Test(i)(0) & " but was " & ResultDecode(i).VAT
+            Assert.IsTrue ResultDecode(i).FormulationNumber = Test(i)(1), "ResultDecode.FormulationNumber " & i & " should be " & Test(i)(1) & " but was " & ResultDecode(i).FormulationNumber
+        Else
+            Assert.Fail "Decode of UFI " & Test(i)(2) & " failed with no result."
+        End If
+    Next i
+    
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("TestCountry")
+Private Sub TestCountryXN()
+    On Error GoTo TestFail
+    
+    'Arrange:
+    Dim sut As UFIgenerator
+    Set sut = New UFIgenerator
+    
+    Const n As Long = 5
+    Const CountryCode As String = "XN"
+    Const MultiCountryCode As String = "GB|XN"
+    
+    Dim Test() As Variant
+    ReDim Test(1 To n) As Variant
+    
+    Test(1) = Array("987654321", "156920229", "GJC1-S7TH-AKFK-TR8P")
+    Test(2) = Array("999987654321", "156920229", "CJC1-47ES-AKFS-WTFW")
+    Test(3) = Array("999999999999", "156920229", "3JC1-47ET-6KFH-WMV8")
+    Test(4) = Array("ZY123", "268435455", "53NN-7KTT-1XS1-DDPH")
+    Test(5) = Array("AB987", "268435455", "M3NN-7KTS-YXSK-D8UW")
+    
+    'Act:
+    Dim ResultGenerate() As String
+    ReDim ResultGenerate(1 To n) As String
+    Dim ResultDecode() As DecodedUFI
+    ReDim ResultDecode(1 To n) As DecodedUFI
+    
+    Dim i As Long
+    For i = 1 To n
+        ResultGenerate(i) = sut.Generate(CountryCode, Test(i)(0), Test(i)(1))
+        Set ResultDecode(i) = sut.Decode(Test(i)(2))
+    Next i
+    
+    'Assert:
+    For i = 1 To n
+        Assert.IsTrue ResultGenerate(i) = Test(i)(2), "ResultGenerate " & i & " should be " & Test(i)(2) & " but was " & ResultGenerate(i)
+        
+        If Not ResultDecode(i) Is Nothing Then
+            Assert.IsTrue ResultDecode(i).CountryCode = MultiCountryCode, "ResultDecode.CountryCode " & i & " should be " & MultiCountryCode & " but was " & ResultDecode(i).CountryCode
             Assert.IsTrue ResultDecode(i).VAT = Test(i)(0), "ResultDecode.VAT " & i & " should be " & Test(i)(0) & " but was " & ResultDecode(i).VAT
             Assert.IsTrue ResultDecode(i).FormulationNumber = Test(i)(1), "ResultDecode.FormulationNumber " & i & " should be " & Test(i)(1) & " but was " & ResultDecode(i).FormulationNumber
         Else
@@ -591,6 +644,7 @@ Private Sub TestCountryGR()
     
     Const n As Long = 1
     Const CountryCode As String = "GR"
+    Const MultiCountryCode As String = "GR|EL"
     
     Dim Test() As Variant
     ReDim Test(1 To n) As Variant
@@ -614,7 +668,55 @@ Private Sub TestCountryGR()
         Assert.IsTrue ResultGenerate(i) = Test(i)(2), "ResultGenerate " & i & " should be " & Test(i)(2) & " but was " & ResultGenerate(i)
         
         If Not ResultDecode(i) Is Nothing Then
-            Assert.IsTrue ResultDecode(i).CountryCode = CountryCode, "ResultDecode.CountryCode " & i & " should be " & CountryCode & " but was " & ResultDecode(i).CountryCode
+            Assert.IsTrue ResultDecode(i).CountryCode = MultiCountryCode, "ResultDecode.CountryCode " & i & " should be " & MultiCountryCode & " but was " & ResultDecode(i).CountryCode
+            Assert.IsTrue ResultDecode(i).VAT = Test(i)(0), "ResultDecode.VAT " & i & " should be " & Test(i)(0) & " but was " & ResultDecode(i).VAT
+            Assert.IsTrue ResultDecode(i).FormulationNumber = Test(i)(1), "ResultDecode.FormulationNumber " & i & " should be " & Test(i)(1) & " but was " & ResultDecode(i).FormulationNumber
+        Else
+            Assert.Fail "Decode of UFI " & Test(i)(2) & " failed with no result."
+        End If
+    Next i
+    
+TestExit:
+    Exit Sub
+TestFail:
+    Assert.Fail "Test raised an error: #" & Err.Number & " - " & Err.Description
+End Sub
+
+'@TestMethod("TestCountry")
+Private Sub TestCountryEL()
+    On Error GoTo TestFail
+    
+    'Arrange:
+    Dim sut As UFIgenerator
+    Set sut = New UFIgenerator
+    
+    Const n As Long = 1
+    Const CountryCode As String = "EL"
+    Const MultiCountryCode As String = "GR|EL"
+    
+    Dim Test() As Variant
+    ReDim Test(1 To n) As Variant
+    
+    Test(1) = Array("567438921", "66260700", "QNWM-9X6E-E46N-G4GJ")
+    
+    'Act:
+    Dim ResultGenerate() As String
+    ReDim ResultGenerate(1 To n) As String
+    Dim ResultDecode() As DecodedUFI
+    ReDim ResultDecode(1 To n) As DecodedUFI
+    
+    Dim i As Long
+    For i = 1 To n
+        ResultGenerate(i) = sut.Generate(CountryCode, Test(i)(0), Test(i)(1))
+        Set ResultDecode(i) = sut.Decode(Test(i)(2))
+    Next i
+    
+    'Assert:
+    For i = 1 To n
+        Assert.IsTrue ResultGenerate(i) = Test(i)(2), "ResultGenerate " & i & " should be " & Test(i)(2) & " but was " & ResultGenerate(i)
+        
+        If Not ResultDecode(i) Is Nothing Then
+            Assert.IsTrue ResultDecode(i).CountryCode = MultiCountryCode, "ResultDecode.CountryCode " & i & " should be " & MultiCountryCode & " but was " & ResultDecode(i).CountryCode
             Assert.IsTrue ResultDecode(i).VAT = Test(i)(0), "ResultDecode.VAT " & i & " should be " & Test(i)(0) & " but was " & ResultDecode(i).VAT
             Assert.IsTrue ResultDecode(i).FormulationNumber = Test(i)(1), "ResultDecode.FormulationNumber " & i & " should be " & Test(i)(1) & " but was " & ResultDecode(i).FormulationNumber
         Else

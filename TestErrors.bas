@@ -107,7 +107,7 @@ End Sub
 
 
 '@TestMethod("Return Errors")
-Private Sub ErrorInvalidUFI_VAL001()
+Private Sub ErrorInvalidUFI_VAL001A()
     Const ExpectedError As Long = vbObjectError + 551
     On Error GoTo TestFail
     
@@ -117,7 +117,7 @@ Private Sub ErrorInvalidUFI_VAL001()
 
     'Act:
     Dim TestResult As DecodedUFI
-    Set TestResult = sut.Decode("GMTT-2SQN-6FD-6TV1") 'only 15 characters
+    Set TestResult = sut.Decode("GMTT-2SQN-6FD-6TV1") 'only 18 characters (incl. hyphens)
 
 Assert:
     Assert.Fail "Expected error was not raised."
@@ -131,6 +131,33 @@ TestFail:
         Resume Assert
     End If
 End Sub
+
+'@TestMethod("Return Errors")
+Private Sub ErrorInvalidUFI_VAL001B()
+    Const ExpectedError As Long = vbObjectError + 551
+    On Error GoTo TestFail
+    
+    'Arrange:
+    Dim sut As UFIgenerator
+    Set sut = New UFIgenerator
+
+    'Act:
+    Dim TestResult As DecodedUFI
+    Set TestResult = sut.Decode("GMTT-2SQN-6FDD6TV1-") 'only 19 characters (incl. hyphens) but wrong format
+
+Assert:
+    Assert.Fail "Expected error was not raised."
+
+TestExit:
+    Exit Sub
+TestFail:
+    If Err.Number = ExpectedError Then
+        Resume TestExit
+    Else
+        Resume Assert
+    End If
+End Sub
+
 
 
 '@TestMethod("Return Errors")
@@ -158,6 +185,8 @@ TestFail:
         Resume Assert
     End If
 End Sub
+
+
 
 '@TestMethod("Return Errors")
 Private Sub ErrorInvalidUFI_VAL003()

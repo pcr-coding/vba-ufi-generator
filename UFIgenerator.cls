@@ -106,17 +106,20 @@ Public Function Decode(ByVal UFI As String) As DecodedUFI
     Dim localUFI As String
     localUFI = UFI
     
-    'remove dashes and spaces
-    localUFI = Replace$(localUFI, "-", vbNullString, Compare:=vbBinaryCompare)
+    'remove spaces
     localUFI = Replace$(localUFI, " ", vbNullString, Compare:=vbBinaryCompare)
     
     
-    'VAL001 - UFI has 16 characters?
-    If Len(localUFI) <> 16 Then
-        'ERR: 551 VAL001 - Invalid UFI.  UFI must have 16 characters. Additional dashes or spaces for better readability are allowed.
-        Err.Raise vbObjectError + 551, "VAL001 - Invalid UFI.", "UFI must have 16 characters. Additional dashes or spaces for better readability are allowed."
+    'VAL001 - UFI has 19 characters in the correct format?
+    If Not IsMatchingPattern("[^-]{4}-[^-]{4}-[^-]{4}-[^-]{4}", localUFI) Then
+        'ERR: 551 VAL001 - Invalid UFI.  UFI must have 19 characters (including hypens, excluding spaces)
+        Err.Raise vbObjectError + 551, "VAL001 - Invalid UFI.", "UFI must have 19 characters (including hypens, excluding spaces)."
         Exit Function
     End If
+    
+    
+    'remove dashes
+    localUFI = Replace$(localUFI, "-", vbNullString, Compare:=vbBinaryCompare)
     
     
     'VAL002 - UFI has only allowed characters?
@@ -175,7 +178,7 @@ Public Function Decode(ByVal UFI As String) As DecodedUFI
             CountryCode = "FR"
             
         Case 2
-            CountryCode = "GB"
+            CountryCode = "GB|XN"
 
         Case 3
             b = 1
@@ -205,7 +208,7 @@ Public Function Decode(ByVal UFI As String) As DecodedUFI
                 Err.Raise vbObjectError + 555, "VAL004 - Invalid UFI.", "Inconsistency in country group code / number of bits / country code found."
                 Exit Function
             End If
-            CountryCode = Array("BG", "CZ", "IE", "ES", "PL", "RO", "SK", "CY", "IS", "BE", "DE", "EE", "GR", "NO", "PT", "AT", "DK", "FI", "HU", "LU", "MT", "SI", "LI")(C)
+            CountryCode = Array("BG", "CZ", "IE", "ES", "PL", "RO", "SK", "CY", "IS", "BE", "DE", "EE", "GR|EL", "NO", "PT", "AT", "DK", "FI", "HU", "LU", "MT", "SI", "LI")(C)
         
         Case Else
             'ERR: 554 VAL004A - Invalid UFI.  Invalid country group code found.
@@ -231,14 +234,14 @@ Public Function Decode(ByVal UFI As String) As DecodedUFI
     
     
     'Return decoded data
-    Dim DecUFI As DecodedUFI
-    Set DecUFI = New DecodedUFI
+    Dim decUFI As DecodedUFI
+    Set decUFI = New DecodedUFI
     
-    DecUFI.CountryCode = CountryCode
-    DecUFI.VAT = VAT
-    DecUFI.FormulationNumber = FormulationNumber
+    decUFI.CountryCode = CountryCode
+    decUFI.VAT = VAT
+    decUFI.FormulationNumber = FormulationNumber
     
-    Set Decode = DecUFI
+    Set Decode = decUFI
 End Function
 
 
@@ -310,7 +313,7 @@ Private Function GetBinaryVAT(ByVal CountryCode As String, ByVal VAT As String) 
                 V = CDec(VAT)
             End If
             
-        Case "DE", "EE", "GR", "NO", "PT"
+        Case "DE", "EE", "GR", "EL", "NO", "PT"
             If IsMatchingPattern("^[0-9]{9}$", VAT) Then
                 V = CDec(VAT)
             End If
@@ -362,7 +365,7 @@ Private Function GetBinaryVAT(ByVal CountryCode As String, ByVal VAT As String) 
                 V = CDec((36 * c1 + c2) * 10 ^ 9 + d)
             End If
             
-        Case "GB"
+        Case "GB", "XN"
             If IsMatchingPattern("^[0-9]{9}([0-9]{3})?$", VAT) Then
                 d = CDec(VAT)
                 V = CDec(2 ^ 40 + d)
@@ -522,7 +525,7 @@ Private Function UndoBinaryVAT(ByVal CountryCode As String, ByVal BinaryVAT As S
             End If
             If Not IsMatchingPattern("^[0-9]{8,10}$", VAT) Then VAT = vbNullString
         
-        Case "DE", "EE", "GR", "NO", "PT"
+        Case "DE", "EE", "GR", "EL", "GR|EL", "NO", "PT"
             'For matching [0-9]{9}
             VAT = Right$(String(9, "0") & CStr(V), 9)
             If Not IsMatchingPattern("^[0-9]{9}$", VAT) Then VAT = vbNullString
@@ -585,7 +588,7 @@ Private Function UndoBinaryVAT(ByVal CountryCode As String, ByVal BinaryVAT As S
             VAT = Character1 & Character2 & Right$(String(9, "0") & CStr(d), 9)
             If Not IsMatchingPattern("^[0-9A-Z]{2}[0-9]{9}$", VAT) Then VAT = vbNullString
         
-        Case "GB"
+        Case "GB", "XN", "GB|XN"
             d = CLngLng(V - 2 ^ 40)
             If d > 0 Then
                 'For matching ([0-9]{9}([0-9]{3})?
@@ -870,7 +873,7 @@ Private Function GetCountryGroupCodeBinary(ByVal CountryCode As String) As Strin
         Case "FR"
             ReturnValue = "0001"   '1
             
-        Case "GB"
+        Case "GB", "XN"
             ReturnValue = "0010"   '2
             
         Case "LT", "SE"
@@ -879,7 +882,7 @@ Private Function GetCountryGroupCodeBinary(ByVal CountryCode As String) As Strin
         Case "HR", "IT", "LV", "NL"
             ReturnValue = "0100"   '4
             
-        Case "BG", "CZ", "IE", "ES", "PL", "RO", "SK", "CY", "IS", "BE", "DE", "EE", "GR", "NO", "PT", "AT", "DK", "FI", "HU", "LU", "MT", "SI", "LI"
+        Case "BG", "CZ", "IE", "ES", "PL", "RO", "SK", "CY", "IS", "BE", "DE", "EE", "GR", "EL", "NO", "PT", "AT", "DK", "FI", "HU", "LU", "MT", "SI", "LI"
             ReturnValue = "0101"   '5
             
         Case Else
@@ -899,7 +902,8 @@ Private Function GetCountryCodeBinary(ByVal CountryCode As String) As String
         Case vbNullString 'company keys
                           ReturnValue = vbNullString
             
-        Case "FR", "GB":  ReturnValue = vbNullString
+        Case "FR", _
+             "GB", "XN": ReturnValue = vbNullString
         
         Case "LT":        ReturnValue = "0"       '0
         Case "SE":        ReturnValue = "1"       '1
@@ -921,7 +925,7 @@ Private Function GetCountryCodeBinary(ByVal CountryCode As String) As String
         Case "BE":        ReturnValue = "0001001" '9
         Case "DE":        ReturnValue = "0001010" '10
         Case "EE":        ReturnValue = "0001011" '11
-        Case "GR":        ReturnValue = "0001100" '12
+        Case "GR", "EL":  ReturnValue = "0001100" '12
         Case "NO":        ReturnValue = "0001101" '13
         Case "PT":        ReturnValue = "0001110" '14
         Case "AT":        ReturnValue = "0001111" '15
