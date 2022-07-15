@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://opensource.org/licenses/gpl-3.0)
 
 VBA Generator/decoder for [ECHA](https://ufi.echa.europa.eu/#/create) UFIs (Unique Formula Identifier)  
-:books: [UFI Developer manual](https://poisoncentres.echa.europa.eu/documents/1789887/1803644/ufi_developers_manual_en.pdf)
+According :books: [UFI Developer manual](https://poisoncentres.echa.europa.eu/documents/1789887/1803644/ufi_developers_manual_en.pdf) version 1.5 (2022-01).
 
 ## Syntax
 ### Generate function
